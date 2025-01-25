@@ -1,10 +1,16 @@
 import os
 from dotenv import load_dotenv
 
+# Загрузка переменных окружения из файла .env
 load_dotenv()
 
+# Токен Telegram бота
 TELEGRAM_API_TOKEN = os.getenv('TELEGRAM_API_TOKEN')
-API_KEY_NEWS = os.getenv('API_KEY_NEWS')
-OW_API_KEY= os.getenv('OW_API_KEY')
+
+# Ключи API для новостей, фото и видео
+NEWS_API_KEY = os.getenv('NEWS_API_KEY')
+UNSPLASH_API_KEY = os.getenv('UNSPLASH_API_KEY')
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
-UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
+
+# Настройки базы данных SQLite
+# DATABASE_URL = "sqlite:///database.db"

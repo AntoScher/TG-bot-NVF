@@ -1,28 +1,40 @@
-import logging
-from aiogram import types, Dispatcher
-from aiogram.fsm.context import FSMContext
+from aiogram import Router, types, Dispatcher
+from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from api.news_api import get_news
 
-async def request_news(callback_query: types.CallbackQuery, state: FSMContext):
-    await callback_query.message.answer("Введи текстовый запрос для новостей:")
-    await state.set_state("awaiting_news_query")
-    logging.info("Установлено состояние 'awaiting_news_query'.")
+router = Router()
 
-async def process_news_query(message: types.Message, state: FSMContext):
-    logging.info(f"Получено текстовое сообщение: {message.text}")
-    if await state.get_state() == "awaiting_news_query":
-        query = message.text.strip()
-        logging.info(f"Поисковый запрос: {query}")
-        try:
-            news_items = get_news(query)
-            for item in news_items:
-                await message.answer(item)
-        except Exception as e:
-            logging.error(f"Произошла ошибка при выполнении поиска: {e}")
-            await message.answer(f"Произошла ошибка при выполнении поиска. Ошибка: {str(e)}")
-        await state.clear()
-        logging.info("Состояние сброшено.")
 
+# Обработчик для новостей
+@router.message(lambda message: message.text == "Новости")
+async def handle_news(message: types.Message):
+    await message.answer("Введите ключевые слова для поиска новостей:")
+
+
+# Обработчик текстового запроса для новостей
+@router.message()
+async def search_news(message: types.Message):
+    query = message.text
+    news = get_news(query=query)
+
+    if not news:
+        await message.answer("Новости не найдены.")
+        return
+
+    for item in news:
+        await message.answer(item)
+
+    # Кнопки для продолжения или возврата в меню
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Вернуться в меню"), KeyboardButton(text="Продолжить поиск")]
+        ],
+        resize_keyboard=True
+    )
+    await message.answer("Что дальше?", reply_markup=keyboard)
+
+
+# Регистрация обработчиков
 def register_handlers_news(dp: Dispatcher):
-    dp.callback_query.register(request_news, lambda callback_query: callback_query.data == "news")
-    dp.message.register(process_news_query)
+    dp.include_router(router)

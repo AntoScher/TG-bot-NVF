@@ -8,24 +8,34 @@ from handlers.news import register_handlers_news
 from handlers.video import register_handlers_video
 from handlers.photo import register_handlers_photo
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
 
+
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+# Инициализация бота и диспетчера
 bot = Bot(token=TELEGRAM_API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
-register_handlers_start(dp)
-register_handlers_news(dp)
-register_handlers_video(dp)
-register_handlers_photo(dp)
+# Регистрация всех обработчиков
+def register_all_handlers(dp: Dispatcher):
+    register_handlers_start(dp)
+    register_handlers_news(dp)
+    register_handlers_video(dp)
+    register_handlers_photo(dp)
 
 async def main():
-    logging.info("Запуск бота.")
+    logging.info("Запуск бота...")
+    register_all_handlers(dp)  # Регистрируем все обработчики
     await dp.start_polling(bot)
     logging.info("Бот остановлен.")
 
 if __name__ == '__main__':
-    logging.info("Запуск основного скрипта.")
-    asyncio.run(main())
-    logging.info("Основной скрипт завершен.")
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        logging.error(f"Ошибка при запуске бота: {e}")
