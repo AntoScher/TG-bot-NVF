@@ -1,4 +1,4 @@
-def split_file(input_file, output_prefix, max_chars=4999):
+def split_file(input_file, output_prefix, max_chars=9999):
     # Чтение файла и подсчет общего количества символов
     with open(input_file, 'r', encoding='utf-8') as file:
         lines = file.readlines()
