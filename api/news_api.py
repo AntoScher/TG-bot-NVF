@@ -3,10 +3,8 @@ import requests
 from typing import List, Optional
 import logging
 
-# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 def get_news(query: Optional[str] = None, from_date: Optional[str] = None) -> List[str]:
     """
@@ -22,22 +20,19 @@ def get_news(query: Optional[str] = None, from_date: Optional[str] = None) -> Li
         'q': query,  # Поиск по ключевым словам
         'from': from_date  # Фильтрация по дате
     }
-
     try:
-        response = requests.get(url, params=params)
+        logger.info(f"Запрос к News API с параметрами: {params}")
+        response = requests.get(url, params=params, timeout=10)  # Добавляем тайм-аут
         response.raise_for_status()  # Проверка на ошибки HTTP
         data = response.json()
-
+        logger.info(f"Ответ от News API: {data}")
         if data['status'] != 'ok' or not data['articles']:
             logger.warning("Новости не найдены или API вернул пустой ответ.")
             return ["Новости не найдены."]
-
         news = []
         for article in data['articles']:
             news.append(f"{article['title']}\n{article['url']}")
-
         return news
-
     except requests.exceptions.RequestException as e:
         logger.error(f"Ошибка при запросе к News API: {e}")
         return ["Не удалось получить новости. Пожалуйста, попробуйте позже."]
